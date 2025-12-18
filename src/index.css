@@ -1,0 +1,118 @@
+@import "tailwindcss";
+
+@theme {
+  --font-heading: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter Tight", sans-serif;
+  --color-background: #12131a;
+  --color-surface: #171821;
+  --color-surface-light: #1e1f2a;
+  --color-accent: #675de6;
+  --color-accent-hover: #7b72f0;
+  --color-premium: #eab308;
+  --color-border: rgba(255, 255, 255, 0.1);
+}
+
+@layer base {
+  *,
+  *::before,
+  *::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    min-width: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background-color: var(--color-background);
+    color: #e2e8f0;
+    min-height: 100%;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  #root {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-heading);
+  }
+
+  button {
+    font: inherit;
+    color: inherit;
+    background: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  a {
+    color: inherit;
+    text-decoration: none;
+  }
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-background);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-surface-light);
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
+}
+
+/* Fix select dropdown background */
+select {
+  background-color: var(--color-surface);
+  color: #e2e8f0;
+}
+
+select option {
+  background-color: var(--color-surface);
+  color: #e2e8f0;
+  padding: 8px;
+}
+
+select option:hover,
+select option:focus,
+select option:checked {
+  background-color: var(--color-accent);
+  color: white;
+}
+
+/* Multi-select styling */
+select[multiple] option {
+  padding: 8px 12px;
+  margin: 2px 0;
+  border-radius: 4px;
+}
+
+select[multiple] option:checked {
+  background: linear-gradient(
+    0deg,
+    var(--color-accent) 0%,
+    var(--color-accent) 100%
+  );
+}
