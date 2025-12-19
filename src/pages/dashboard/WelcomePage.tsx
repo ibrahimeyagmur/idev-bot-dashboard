@@ -18,6 +18,7 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
 import { DiscordMessagePreview } from '../../components/server/DiscordMessagePreview';
+import { API_BASE } from '../../lib/api';
 
 
 interface EmbedData {
@@ -142,7 +143,7 @@ export function WelcomePage() {
     
     setSaving(type);
     try {
-      const res = await fetch(`http://localhost:3001/api/server/${serverId}/${type}`, {
+      const res = await fetch(`${API_BASE}/api/server/${serverId}/${type}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include',

@@ -12,6 +12,7 @@ import {
 } from "lucide-react";
 import { Button } from "../ui/Button";
 import type { LevelData, Channel, Role } from "../../pages/ServerDashboard";
+import { API_BASE } from "../../lib/api";
 
 interface Props {
   serverId: string;
@@ -56,7 +57,7 @@ export function LevelSettings({
     setSaving(true);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/levels`,
+        `${API_BASE}/api/server/${serverId}/levels`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

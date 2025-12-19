@@ -21,6 +21,7 @@ import {
 import { Button } from "../ui/Button";
 import { DiscordMessagePreview } from "./DiscordMessagePreview";
 import type { EmbedData, Channel } from "../../pages/ServerDashboard";
+import { API_BASE } from "../../lib/api";
 
 interface Props {
   serverId: string;
@@ -97,7 +98,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
     setSendError("");
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/embeds/${sendingEmbedId}/send`,
+        `${API_BASE}/api/server/${serverId}/embeds/${sendingEmbedId}/send`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -138,8 +139,8 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
     setSaving(true);
     try {
       const url = isCreating
-        ? `http://localhost:3001/api/server/${serverId}/embeds`
-        : `http://localhost:3001/api/server/${serverId}/embeds/${editingEmbed.id}`;
+        ? `${API_BASE}/api/server/${serverId}/embeds`
+        : `${API_BASE}/api/server/${serverId}/embeds/${editingEmbed.id}`;
 
       const res = await fetch(url, {
         method: isCreating ? "POST" : "PUT",
@@ -174,7 +175,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/embeds/${id}`,
+        `${API_BASE}/api/server/${serverId}/embeds/${id}`,
         {
           method: "DELETE",
           credentials: "include",

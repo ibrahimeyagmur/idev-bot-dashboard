@@ -14,6 +14,7 @@ import {
   Settings,
   Loader2,
 } from 'lucide-react';
+import { API_BASE } from '../../lib/api';
 
 interface SystemStatus {
   welcome: { enabled: boolean };
@@ -83,7 +84,7 @@ export function OverviewPage() {
   useEffect(() => {
     const fetchSettings = async () => {
       try {
-        const res = await fetch(`http://localhost:3001/api/server/${serverId}/settings`, {
+        const res = await fetch(`${API_BASE}/api/server/${serverId}/settings`, {
           credentials: 'include',
         });
         if (res.ok) {

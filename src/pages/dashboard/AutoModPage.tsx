@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
 import { useDashboardInit } from "../../context/DashboardContext";
+import { API_BASE } from "../../lib/api";
 
 interface Channel {
   id: string;
@@ -104,7 +105,7 @@ export function AutoModPage() {
     setSaving(type);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/automod/${
+        `${API_BASE}/api/server/${serverId}/automod/${
           type === "antiAd" ? "antiad" : "profanity"
         }`,
         {

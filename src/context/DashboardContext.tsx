@@ -6,6 +6,7 @@ import {
   useCallback,
   ReactNode,
 } from "react";
+import { API_BASE } from "../lib/api";
 
 interface Channel {
   id: string;
@@ -142,13 +143,13 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
       try {
         const [settingsRes, channelsRes, rolesRes] = await Promise.all([
-          fetch(`http://localhost:3001/api/server/${id}/settings`, {
+          fetch(`${API_BASE}/api/server/${id}/settings`, {
             credentials: "include",
           }),
-          fetch(`http://localhost:3001/api/server/${id}/channels`, {
+          fetch(`${API_BASE}/api/server/${id}/channels`, {
             credentials: "include",
           }),
-          fetch(`http://localhost:3001/api/server/${id}/roles`, {
+          fetch(`${API_BASE}/api/server/${id}/roles`, {
             credentials: "include",
           }),
         ]);
@@ -250,7 +251,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/settings`,
+        `${API_BASE}/api/server/${serverId}/settings`,
         {
           credentials: "include",
         }
@@ -279,7 +280,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/channels`,
+        `${API_BASE}/api/server/${serverId}/channels`,
         {
           credentials: "include",
         }
@@ -308,7 +309,7 @@ export function DashboardProvider({ children }: { children: ReactNode }) {
 
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/roles`,
+        `${API_BASE}/api/server/${serverId}/roles`,
         {
           credentials: "include",
         }

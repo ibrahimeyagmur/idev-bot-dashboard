@@ -18,6 +18,7 @@ import {
   Sparkles,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { API_BASE } from "../../lib/api";
 
 interface LevelData {
   enabled: boolean;
@@ -62,7 +63,7 @@ export function LevelsPage() {
     setSaving(true);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/levels`,
+        `${API_BASE}/api/server/${serverId}/levels`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

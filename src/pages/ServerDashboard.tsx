@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Button } from "../components/ui/Button";
+import { API_BASE } from "../lib/api";
 import { WelcomeSettings } from "../components/server/WelcomeSettings";
 import { LevelSettings } from "../components/server/LevelSettings";
 import { EmbedBuilder } from "../components/server/EmbedBuilder";
@@ -107,13 +108,13 @@ export function ServerDashboard() {
 
       try {
         const [settingsRes, channelsRes, rolesRes] = await Promise.all([
-          fetch(`http://localhost:3001/api/server/${serverId}/settings`, {
+          fetch(`${API_BASE}/api/server/${serverId}/settings`, {
             credentials: "include",
           }),
-          fetch(`http://localhost:3001/api/server/${serverId}/channels`, {
+          fetch(`${API_BASE}/api/server/${serverId}/channels`, {
             credentials: "include",
           }),
-          fetch(`http://localhost:3001/api/server/${serverId}/roles`, {
+          fetch(`${API_BASE}/api/server/${serverId}/roles`, {
             credentials: "include",
           }),
         ]);

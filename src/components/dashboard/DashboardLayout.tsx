@@ -7,6 +7,7 @@ import { DashboardProvider } from "../../context/DashboardContext";
 import { DashboardSidebar } from "./DashboardSidebar";
 import { DashboardTopbar } from "./DashboardTopbar";
 import { Button } from "../ui/Button";
+import { API_BASE } from "../../lib/api";
 
 interface Guild {
   id: string;
@@ -30,7 +31,7 @@ export function DashboardLayout() {
 
     const fetchGuilds = async () => {
       try {
-        const res = await fetch("http://localhost:3001/api/guilds", {
+        const res = await fetch(`${API_BASE}/api/guilds`, {
           credentials: "include",
         });
         if (!res.ok) throw new Error("Sunucular yüklenemedi");

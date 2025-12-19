@@ -15,6 +15,7 @@ import type {
   LeaveData,
   Channel,
 } from "../../pages/ServerDashboard";
+import { API_BASE } from "../../lib/api";
 
 interface Props {
   serverId: string;
@@ -71,7 +72,7 @@ export function WelcomeSettings({
     setSaving("welcome");
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/welcome`,
+        `${API_BASE}/api/server/${serverId}/welcome`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -97,7 +98,7 @@ export function WelcomeSettings({
     setSaving("leave");
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/leave`,
+        `${API_BASE}/api/server/${serverId}/leave`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },

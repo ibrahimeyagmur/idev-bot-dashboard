@@ -15,6 +15,7 @@ import {
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { API_BASE } from "../../lib/api";
 
 interface Rule {
   id: string;
@@ -88,7 +89,7 @@ export function AutoReplyPage() {
     setSaving(true);
     try {
       const res = await fetch(
-        `http://localhost:3001/api/server/${serverId}/autoreply`,
+        `${API_BASE}/api/server/${serverId}/autoreply`,
         {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
