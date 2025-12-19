@@ -1,4 +1,4 @@
-import { HeroSection, FeaturesSection } from '../components/sections';
+import { HeroSection, FeaturesSection } from "../components/sections";
 
 export function HomePage() {
   return (

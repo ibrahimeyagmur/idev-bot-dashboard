@@ -1,5 +1,5 @@
-import { useState, useRef, useEffect, type ReactNode } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { useState, useRef, useEffect, type ReactNode } from "react";
+import { ChevronDown } from "lucide-react";
 
 interface DropdownItem {
   label: string;
@@ -19,18 +19,21 @@ export function Dropdown({ label, items, icon }: DropdownProps) {
 
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node)
+      ) {
         setIsOpen(false);
       }
     }
 
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div 
-      ref={dropdownRef} 
+    <div
+      ref={dropdownRef}
       className="relative"
       onMouseEnter={() => setIsOpen(true)}
       onMouseLeave={() => setIsOpen(false)}
@@ -41,7 +44,11 @@ export function Dropdown({ label, items, icon }: DropdownProps) {
       >
         {icon}
         {label}
-        <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown
+          className={`w-4 h-4 transition-transform duration-200 ${
+            isOpen ? "rotate-180" : ""
+          }`}
+        />
       </button>
 
       {isOpen && (

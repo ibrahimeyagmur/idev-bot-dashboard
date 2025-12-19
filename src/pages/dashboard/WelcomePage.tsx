@@ -84,7 +84,6 @@ export function WelcomePage() {
   const initialDataRef = useRef<{ welcome: WelcomeData; leave: LeaveData } | null>(null);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
 
-  // Block navigation when there are unsaved changes
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
@@ -97,7 +96,6 @@ export function WelcomePage() {
     }
   }, [blocker]);
 
-  // Track changes
   useEffect(() => {
     if (initialDataRef.current) {
       const hasChanges =
@@ -107,7 +105,6 @@ export function WelcomePage() {
     }
   }, [welcomeData, leaveData]);
 
-  // Use cached data from context
   useEffect(() => {
     if (!contextLoading && settings) {
       const welcomeFromServer = { ...defaultWelcome, ...settings.welcome, embed: { ...defaultEmbed, ...settings.welcome?.embed } };
@@ -155,7 +152,6 @@ export function WelcomePage() {
       if (res.ok) {
         setSaved(type);
         setTimeout(() => setSaved(null), 2000);
-        // Update initial data ref
         if (type === 'welcome') {
           initialDataRef.current = { ...initialDataRef.current!, welcome: { ...welcomeData } };
         } else {
@@ -164,7 +160,6 @@ export function WelcomePage() {
         setHasUnsavedChanges(false);
       }
     } catch {
-      // Silent fail
     } finally {
       setSaving(null);
     }
@@ -225,7 +220,6 @@ export function WelcomePage() {
         </label>
       </div>
 
-      {/* Validation Error */}
       {validationErrors[type] && (
         <div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 rounded-lg flex items-center gap-2 text-red-400 text-sm">
           <AlertTriangle className="w-4 h-4" />
@@ -233,7 +227,6 @@ export function WelcomePage() {
         </div>
       )}
 
-      {/* Disabled overlay message */}
       {!data.enabled && (
         <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-yellow-400 text-sm">
           <AlertTriangle className="w-4 h-4" />
@@ -243,7 +236,6 @@ export function WelcomePage() {
 
       <div className={`grid grid-cols-1 lg:grid-cols-2 gap-6 ${!data.enabled ? 'opacity-50 pointer-events-none' : ''}`}>
         <div className="space-y-4">
-          {/* Channel - Required */}
           <div>
             <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
               <Hash className="w-4 h-4" />
@@ -262,7 +254,6 @@ export function WelcomePage() {
             </select>
           </div>
 
-          {/* Message Type */}
           <div>
             <label className="text-sm font-medium text-slate-300 mb-2 block">Mesaj Türü</label>
             <div className="flex gap-2">
@@ -291,7 +282,6 @@ export function WelcomePage() {
             </div>
           </div>
 
-          {/* Normal Message */}
           {data.messageType === 'normal' && (
             <div>
               <label className="text-sm font-medium text-slate-300 mb-2 block">
@@ -310,7 +300,6 @@ export function WelcomePage() {
             </div>
           )}
 
-          {/* Embed Details */}
           {data.messageType === 'embed' && (
             <div className="space-y-3">
               <div>
@@ -470,7 +459,6 @@ export function WelcomePage() {
         )}
       </div>
 
-      {/* Unsaved Changes Modal */}
       <AnimatePresence>
         {showUnsavedModal && (
           <motion.div

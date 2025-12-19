@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { Link, useLocation, useParams } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState } from "react";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Settings,
@@ -14,7 +14,7 @@ import {
   Check,
   Plus,
   Sparkles,
-} from 'lucide-react';
+} from "lucide-react";
 
 interface Guild {
   id: string;
@@ -29,13 +29,28 @@ interface Props {
 }
 
 const menuItems = [
-  { id: 'overview', label: 'Kontrol Paneli', icon: LayoutDashboard, path: '' },
-  { id: 'settings', label: 'Ayarlar', icon: Settings, path: '/settings' },
-  { id: 'welcome', label: 'Karşılama & Veda', icon: MessageSquare, path: '/welcome' },
-  { id: 'autoreply', label: 'Otomatik Cevap', icon: MessageCircle, path: '/autoreply' },
-  { id: 'automod', label: 'Otomatik Moderasyon', icon: Shield, path: '/automod' },
-  { id: 'levels', label: 'Seviye Sistemi', icon: TrendingUp, path: '/levels' },
-  { id: 'embeds', label: 'Gömülü Mesajlar', icon: Palette, path: '/embeds' },
+  { id: "overview", label: "Kontrol Paneli", icon: LayoutDashboard, path: "" },
+  { id: "settings", label: "Ayarlar", icon: Settings, path: "/settings" },
+  {
+    id: "welcome",
+    label: "Karşılama & Veda",
+    icon: MessageSquare,
+    path: "/welcome",
+  },
+  {
+    id: "autoreply",
+    label: "Otomatik Cevap",
+    icon: MessageCircle,
+    path: "/autoreply",
+  },
+  {
+    id: "automod",
+    label: "Otomatik Moderasyon",
+    icon: Shield,
+    path: "/automod",
+  },
+  { id: "levels", label: "Seviye Sistemi", icon: TrendingUp, path: "/levels" },
+  { id: "embeds", label: "Gömülü Mesajlar", icon: Palette, path: "/embeds" },
 ];
 
 export function DashboardSidebar({ guilds, currentGuild }: Props) {
@@ -45,25 +60,24 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
 
   const getGuildIcon = (guild: Guild) => {
     if (!guild.icon) return null;
-    // If icon is already a full URL, use it directly
-    if (guild.icon.startsWith('http')) {
+    if (guild.icon.startsWith("http")) {
       return guild.icon;
     }
-    // Otherwise construct the URL from hash
     return `https://cdn.discordapp.com/icons/${guild.id}/${guild.icon}.png?size=64`;
   };
 
   const isActive = (path: string) => {
     const basePath = `/dashboard/${serverId}`;
-    if (path === '') {
-      return location.pathname === basePath || location.pathname === `${basePath}/`;
+    if (path === "") {
+      return (
+        location.pathname === basePath || location.pathname === `${basePath}/`
+      );
     }
     return location.pathname === `${basePath}${path}`;
   };
 
   return (
     <aside className="w-64 bg-[#12131a] border-r border-white/10 flex flex-col h-screen fixed left-0 top-0">
-      {/* Logo */}
       <div className="p-4 border-b border-white/10">
         <Link to="/" className="flex items-center gap-2">
           <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-accent to-[#8b7cf7] flex items-center justify-center">
@@ -73,7 +87,6 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
         </Link>
       </div>
 
-      {/* Server Switcher */}
       <div className="p-3 border-b border-white/10">
         <button
           onClick={() => setIsServerSwitcherOpen(!isServerSwitcherOpen)}
@@ -93,9 +106,13 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
                 </div>
               )}
               <div className="flex-1 text-left">
-                <p className="text-sm font-medium text-white truncate">{currentGuild.name}</p>
+                <p className="text-sm font-medium text-white truncate">
+                  {currentGuild.name}
+                </p>
                 <p className="text-xs text-slate-400">
-                  {currentGuild.botInstalled ? 'Bot kurulu' : 'Bot kurulu değil'}
+                  {currentGuild.botInstalled
+                    ? "Bot kurulu"
+                    : "Bot kurulu değil"}
                 </p>
               </div>
             </>
@@ -108,16 +125,17 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
             </div>
           )}
           <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform ${isServerSwitcherOpen ? 'rotate-180' : ''}`}
+            className={`w-4 h-4 text-slate-400 transition-transform ${
+              isServerSwitcherOpen ? "rotate-180" : ""
+            }`}
           />
         </button>
 
-        {/* Server Dropdown */}
         <AnimatePresence>
           {isServerSwitcherOpen && (
             <motion.div
               initial={{ opacity: 0, height: 0 }}
-              animate={{ opacity: 1, height: 'auto' }}
+              animate={{ opacity: 1, height: "auto" }}
               exit={{ opacity: 0, height: 0 }}
               className="mt-2 overflow-hidden"
             >
@@ -128,7 +146,7 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
                     to={`/dashboard/${guild.id}`}
                     onClick={() => setIsServerSwitcherOpen(false)}
                     className={`flex items-center gap-3 p-2.5 hover:bg-white/5 transition-colors ${
-                      guild.id === serverId ? 'bg-accent/10' : ''
+                      guild.id === serverId ? "bg-accent/10" : ""
                     }`}
                   >
                     {getGuildIcon(guild) ? (
@@ -142,8 +160,12 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
                         <Server className="w-3.5 h-3.5 text-slate-400" />
                       </div>
                     )}
-                    <span className="flex-1 text-sm text-white truncate">{guild.name}</span>
-                    {guild.id === serverId && <Check className="w-4 h-4 text-accent" />}
+                    <span className="flex-1 text-sm text-white truncate">
+                      {guild.name}
+                    </span>
+                    {guild.id === serverId && (
+                      <Check className="w-4 h-4 text-accent" />
+                    )}
                     {!guild.botInstalled && (
                       <span className="text-xs text-amber-400">Bot yok</span>
                     )}
@@ -165,7 +187,6 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
         </AnimatePresence>
       </div>
 
-      {/* Navigation Menu */}
       <nav className="flex-1 p-3 space-y-1 overflow-y-auto">
         {menuItems.map((item) => {
           const Icon = item.icon;
@@ -176,8 +197,8 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
               to={`/dashboard/${serverId}${item.path}`}
               className={`flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                 active
-                  ? 'bg-accent text-white'
-                  : 'text-slate-400 hover:text-white hover:bg-white/5'
+                  ? "bg-accent text-white"
+                  : "text-slate-400 hover:text-white hover:bg-white/5"
               }`}
             >
               <Icon className="w-5 h-5" />
@@ -187,7 +208,6 @@ export function DashboardSidebar({ guilds, currentGuild }: Props) {
         })}
       </nav>
 
-      {/* Footer */}
       <div className="p-3 border-t border-white/10">
         <div className="px-3 py-2 text-xs text-slate-500">
           IDev Dashboard v1.0

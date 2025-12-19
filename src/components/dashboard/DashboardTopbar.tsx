@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { Link } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronRight, LogOut, User, ExternalLink } from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+import { useState } from "react";
+import { Link } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import { ChevronRight, LogOut, User, ExternalLink } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 interface Props {
   title: string;
@@ -14,32 +14,31 @@ export function DashboardTopbar({ title, breadcrumbs = [] }: Props) {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
 
   const getAvatarUrl = () => {
-    // Use avatarUrl if available (already full URL from backend)
     if (user?.avatarUrl) {
       return user.avatarUrl;
     }
-    // Fallback: construct from avatar hash
     if (user?.avatar) {
       return `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`;
     }
-    // Default avatar
     return `https://cdn.discordapp.com/embed/avatars/0.png`;
   };
 
   const getDisplayName = () => {
-    return user?.name || user?.username || 'Kullanıcı';
+    return user?.name || user?.username || "Kullanıcı";
   };
 
   return (
     <header className="h-16 bg-background border-b border-white/10 flex items-center justify-between px-6 fixed top-0 left-64 right-0 z-40">
-      {/* Left: Title & Breadcrumbs */}
       <div className="flex items-center gap-2">
         {breadcrumbs.length > 0 && (
           <>
             {breadcrumbs.map((crumb, index) => (
               <div key={index} className="flex items-center gap-2">
                 {crumb.path ? (
-                  <Link to={crumb.path} className="text-sm text-slate-400 hover:text-white transition-colors">
+                  <Link
+                    to={crumb.path}
+                    className="text-sm text-slate-400 hover:text-white transition-colors"
+                  >
                     {crumb.label}
                   </Link>
                 ) : (
@@ -53,7 +52,6 @@ export function DashboardTopbar({ title, breadcrumbs = [] }: Props) {
         <h1 className="text-lg font-semibold text-white">{title}</h1>
       </div>
 
-      {/* Right: User Profile */}
       <div className="relative">
         <button
           onClick={() => setIsProfileOpen(!isProfileOpen)}
@@ -70,7 +68,6 @@ export function DashboardTopbar({ title, breadcrumbs = [] }: Props) {
           </div>
         </button>
 
-        {/* Profile Dropdown */}
         <AnimatePresence>
           {isProfileOpen && (
             <>
@@ -92,8 +89,12 @@ export function DashboardTopbar({ title, breadcrumbs = [] }: Props) {
                       className="w-10 h-10 rounded-full"
                     />
                     <div>
-                      <p className="text-sm font-medium text-white">{getDisplayName()}</p>
-                      <p className="text-xs text-slate-400">@{user?.username}</p>
+                      <p className="text-sm font-medium text-white">
+                        {getDisplayName()}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        @{user?.username}
+                      </p>
                     </div>
                   </div>
                 </div>

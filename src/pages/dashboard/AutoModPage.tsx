@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
-import { useParams, useBlocker } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useEffect, useRef } from "react";
+import { useParams, useBlocker } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   Shield,
   Link2,
@@ -11,9 +11,9 @@ import {
   Hash,
   Users,
   AlertTriangle,
-} from 'lucide-react';
-import { Button } from '../../components/ui/Button';
-import { useDashboardInit } from '../../context/DashboardContext';
+} from "lucide-react";
+import { Button } from "../../components/ui/Button";
+import { useDashboardInit } from "../../context/DashboardContext";
 
 interface Channel {
   id: string;
@@ -29,13 +29,13 @@ interface Role {
 interface AutoModSettings {
   antiAd: {
     enabled: boolean;
-    action: 'delete' | 'timeout' | 'warn';
+    action: "delete" | "timeout" | "warn";
     ignoredChannelIds: string[];
     ignoredRoleIds: string[];
   };
   profanity: {
     enabled: boolean;
-    action: 'delete' | 'timeout' | 'warn';
+    action: "delete" | "timeout" | "warn";
     ignoredChannelIds: string[];
     ignoredRoleIds: string[];
   };
@@ -44,13 +44,13 @@ interface AutoModSettings {
 const defaultSettings: AutoModSettings = {
   antiAd: {
     enabled: false,
-    action: 'delete',
+    action: "delete",
     ignoredChannelIds: [],
     ignoredRoleIds: [],
   },
   profanity: {
     enabled: false,
-    action: 'delete',
+    action: "delete",
     ignoredChannelIds: [],
     ignoredRoleIds: [],
   },
@@ -68,32 +68,29 @@ export function AutoModPage() {
   const initialDataRef = useRef<AutoModSettings | null>(null);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
 
-  // Use channels and roles from dashboard context
   const channels = dashboard.channels;
   const roles = dashboard.roles;
 
-  // Block navigation when there are unsaved changes
   const blocker = useBlocker(
     ({ currentLocation, nextLocation }) =>
       hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
   );
 
   useEffect(() => {
-    if (blocker.state === 'blocked') {
+    if (blocker.state === "blocked") {
       setShowUnsavedModal(true);
       pendingNavigationRef.current = () => blocker.proceed();
     }
   }, [blocker]);
 
-  // Track changes
   useEffect(() => {
     if (initialDataRef.current) {
-      const hasChanges = JSON.stringify(settings) !== JSON.stringify(initialDataRef.current);
+      const hasChanges =
+        JSON.stringify(settings) !== JSON.stringify(initialDataRef.current);
       setHasUnsavedChanges(hasChanges);
     }
   }, [settings]);
 
-  // Load settings from dashboard context
   useEffect(() => {
     if (dashboard.settings.automod) {
       const merged = { ...defaultSettings, ...dashboard.settings.automod };
@@ -103,15 +100,20 @@ export function AutoModPage() {
     setIsLoading(dashboard.isLoading);
   }, [dashboard.settings, dashboard.isLoading]);
 
-  const saveSettings = async (type: 'antiAd' | 'profanity') => {
+  const saveSettings = async (type: "antiAd" | "profanity") => {
     setSaving(type);
     try {
-      const res = await fetch(`http://localhost:3001/api/server/${serverId}/automod/${type === 'antiAd' ? 'antiad' : 'profanity'}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(settings[type]),
-      });
+      const res = await fetch(
+        `http://localhost:3001/api/server/${serverId}/automod/${
+          type === "antiAd" ? "antiad" : "profanity"
+        }`,
+        {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(settings[type]),
+        }
+      );
 
       if (res.ok) {
         setSaved(type);
@@ -120,14 +122,17 @@ export function AutoModPage() {
         setHasUnsavedChanges(false);
       }
     } catch {
-      // Silent fail
     } finally {
       setSaving(null);
     }
   };
 
-  const updateSetting = (type: 'antiAd' | 'profanity', key: string, value: any) => {
-    setSettings(prev => ({
+  const updateSetting = (
+    type: "antiAd" | "profanity",
+    key: string,
+    value: any
+  ) => {
+    setSettings((prev) => ({
       ...prev,
       [type]: { ...prev[type], [key]: value },
     }));
@@ -142,7 +147,7 @@ export function AutoModPage() {
   }
 
   const renderModCard = (
-    type: 'antiAd' | 'profanity',
+    type: "antiAd" | "profanity",
     title: string,
     description: string,
     icon: React.ReactNode
@@ -164,14 +169,13 @@ export function AutoModPage() {
           <input
             type="checkbox"
             checked={settings[type].enabled}
-            onChange={(e) => updateSetting(type, 'enabled', e.target.checked)}
+            onChange={(e) => updateSetting(type, "enabled", e.target.checked)}
             className="sr-only peer"
           />
           <div className="w-11 h-6 bg-white/10 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-accent"></div>
         </label>
       </div>
 
-      {/* Disabled message */}
       {!settings[type].enabled && (
         <div className="mb-4 p-3 bg-yellow-500/10 border border-yellow-500/30 rounded-lg flex items-center gap-2 text-yellow-400 text-sm">
           <Hash className="w-4 h-4" />
@@ -179,12 +183,18 @@ export function AutoModPage() {
         </div>
       )}
 
-      <div className={`space-y-4 ${!settings[type].enabled ? 'opacity-50 pointer-events-none' : ''}`}>
+      <div
+        className={`space-y-4 ${
+          !settings[type].enabled ? "opacity-50 pointer-events-none" : ""
+        }`}
+      >
         <div>
-          <label className="text-sm font-medium text-slate-300 mb-2 block">Eylem</label>
+          <label className="text-sm font-medium text-slate-300 mb-2 block">
+            Eylem
+          </label>
           <select
             value={settings[type].action}
-            onChange={(e) => updateSetting(type, 'action', e.target.value)}
+            onChange={(e) => updateSetting(type, "action", e.target.value)}
             disabled={!settings[type].enabled}
             className="w-full px-4 py-2.5 bg-white/5 border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50 disabled:cursor-not-allowed"
           >
@@ -201,21 +211,23 @@ export function AutoModPage() {
           </label>
           <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/10 rounded-lg min-h-[60px]">
             {channels.map((ch) => {
-              const isSelected = settings[type].ignoredChannelIds.includes(ch.id);
+              const isSelected = settings[type].ignoredChannelIds.includes(
+                ch.id
+              );
               return (
                 <button
                   key={ch.id}
                   onClick={() => {
                     const current = settings[type].ignoredChannelIds;
                     const updated = isSelected
-                      ? current.filter(id => id !== ch.id)
+                      ? current.filter((id) => id !== ch.id)
                       : [...current, ch.id];
-                    updateSetting(type, 'ignoredChannelIds', updated);
+                    updateSetting(type, "ignoredChannelIds", updated);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     isSelected
-                      ? 'bg-accent text-white'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                      ? "bg-accent text-white"
+                      : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
                   }`}
                 >
                   #{ch.name}
@@ -226,7 +238,9 @@ export function AutoModPage() {
               <p className="text-sm text-slate-500">Kanal bulunamadı</p>
             )}
           </div>
-          <p className="text-xs text-slate-500 mt-1">Seçmek için kanallara tıklayın</p>
+          <p className="text-xs text-slate-500 mt-1">
+            Seçmek için kanallara tıklayın
+          </p>
         </div>
 
         <div>
@@ -236,23 +250,29 @@ export function AutoModPage() {
           </label>
           <div className="flex flex-wrap gap-2 p-3 bg-white/5 border border-white/10 rounded-lg min-h-[60px]">
             {roles.map((role) => {
-              const isSelected = settings[type].ignoredRoleIds.includes(role.id);
+              const isSelected = settings[type].ignoredRoleIds.includes(
+                role.id
+              );
               return (
                 <button
                   key={role.id}
                   onClick={() => {
                     const current = settings[type].ignoredRoleIds;
                     const updated = isSelected
-                      ? current.filter(id => id !== role.id)
+                      ? current.filter((id) => id !== role.id)
                       : [...current, role.id];
-                    updateSetting(type, 'ignoredRoleIds', updated);
+                    updateSetting(type, "ignoredRoleIds", updated);
                   }}
                   className={`px-3 py-1.5 rounded-lg text-sm transition-colors ${
                     isSelected
-                      ? 'bg-accent text-white'
-                      : 'bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white'
+                      ? "bg-accent text-white"
+                      : "bg-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
                   }`}
-                  style={isSelected ? {} : { borderLeft: `3px solid ${role.color || '#99aab5'}` }}
+                  style={
+                    isSelected
+                      ? {}
+                      : { borderLeft: `3px solid ${role.color || "#99aab5"}` }
+                  }
                 >
                   {role.name}
                 </button>
@@ -265,7 +285,10 @@ export function AutoModPage() {
         </div>
 
         <div className="pt-4 border-t border-white/10">
-          <Button onClick={() => saveSettings(type)} disabled={saving === type || !settings[type].enabled}>
+          <Button
+            onClick={() => saveSettings(type)}
+            disabled={saving === type || !settings[type].enabled}
+          >
             {saving === type ? (
               <Loader2 className="w-4 h-4 animate-spin mr-2" />
             ) : saved === type ? (
@@ -273,7 +296,7 @@ export function AutoModPage() {
             ) : (
               <Save className="w-4 h-4 mr-2" />
             )}
-            {saved === type ? 'Kaydedildi!' : 'Kaydet'}
+            {saved === type ? "Kaydedildi!" : "Kaydet"}
           </Button>
         </div>
       </div>
@@ -283,7 +306,9 @@ export function AutoModPage() {
   return (
     <div className="max-w-[900px] mx-auto">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-white mb-2">Otomatik Moderasyon</h1>
+        <h1 className="text-2xl font-bold text-white mb-2">
+          Otomatik Moderasyon
+        </h1>
         <p className="text-slate-400">
           Reklam ve küfür engelleme sistemlerini yapılandırın.
         </p>
@@ -291,25 +316,24 @@ export function AutoModPage() {
 
       <div className="space-y-6">
         {renderModCard(
-          'antiAd',
-          'Reklam Engel',
-          'Discord davetleri ve linkleri otomatik olarak engelle.',
+          "antiAd",
+          "Reklam Engel",
+          "Discord davetleri ve linkleri otomatik olarak engelle.",
           <div className="p-3 rounded-xl bg-red-500/20">
             <Link2 className="w-6 h-6 text-red-400" />
           </div>
         )}
 
         {renderModCard(
-          'profanity',
-          'Küfür Engel',
-          'Uygunsuz kelimeleri otomatik olarak engelle.',
+          "profanity",
+          "Küfür Engel",
+          "Uygunsuz kelimeleri otomatik olarak engelle.",
           <div className="p-3 rounded-xl bg-orange-500/20">
             <MessageSquareOff className="w-6 h-6 text-orange-400" />
           </div>
         )}
       </div>
 
-      {/* Unsaved Changes Modal */}
       <AnimatePresence>
         {showUnsavedModal && (
           <motion.div
@@ -330,13 +354,18 @@ export function AutoModPage() {
                   <AlertTriangle className="w-6 h-6 text-yellow-400" />
                 </div>
                 <div>
-                  <h3 className="text-lg font-semibold text-white">Kaydedilmemiş Değişiklikler</h3>
-                  <p className="text-sm text-slate-400">Değişiklikleriniz kaybolacak!</p>
+                  <h3 className="text-lg font-semibold text-white">
+                    Kaydedilmemiş Değişiklikler
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    Değişiklikleriniz kaybolacak!
+                  </p>
                 </div>
               </div>
 
               <p className="text-slate-300 mb-6">
-                Kaydedilmemiş değişiklikleriniz var. Sayfadan ayrılmak istediğinizden emin misiniz?
+                Kaydedilmemiş değişiklikleriniz var. Sayfadan ayrılmak
+                istediğinizden emin misiniz?
               </p>
 
               <div className="flex gap-3">

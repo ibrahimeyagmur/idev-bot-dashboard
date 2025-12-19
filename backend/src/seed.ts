@@ -1,3 +1,3 @@
 export function seedData() {
-  console.log('📦 Database ready');
+  console.log("📦 Database ready");
 }

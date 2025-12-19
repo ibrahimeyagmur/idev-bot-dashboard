@@ -20,7 +20,6 @@ export function SettingsPage() {
         <p className="text-slate-400">Hesap bilgilerinizi ve güvenlik ayarlarını yönetin.</p>
       </div>
 
-      {/* Profile Card */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -60,7 +59,6 @@ export function SettingsPage() {
         </div>
       </motion.div>
 
-      {/* Session Info */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -91,7 +89,6 @@ export function SettingsPage() {
         </div>
       </motion.div>
 
-      {/* Security */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}

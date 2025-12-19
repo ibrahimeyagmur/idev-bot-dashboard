@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
-import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  MessageSquare, 
-  TrendingUp, 
-  Palette, 
+import { useState, useEffect } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
+import {
+  MessageSquare,
+  TrendingUp,
+  Palette,
   ArrowLeft,
   Loader2,
   AlertCircle,
   Shield,
-  Server
-} from 'lucide-react';
-import { useAuth } from '../context/AuthContext';
-import { Button } from '../components/ui/Button';
-import { WelcomeSettings } from '../components/server/WelcomeSettings';
-import { LevelSettings } from '../components/server/LevelSettings';
-import { EmbedBuilder } from '../components/server/EmbedBuilder';
+  Server,
+} from "lucide-react";
+import { useAuth } from "../context/AuthContext";
+import { Button } from "../components/ui/Button";
+import { WelcomeSettings } from "../components/server/WelcomeSettings";
+import { LevelSettings } from "../components/server/LevelSettings";
+import { EmbedBuilder } from "../components/server/EmbedBuilder";
 
 interface GuildInfo {
   id: string;
@@ -34,14 +34,14 @@ interface ServerSettings {
 export interface WelcomeData {
   enabled: boolean;
   channelId: string;
-  messageType: 'normal' | 'embed';
+  messageType: "normal" | "embed";
   message: string;
 }
 
 export interface LeaveData {
   enabled: boolean;
   channelId: string;
-  messageType: 'normal' | 'embed';
+  messageType: "normal" | "embed";
   message: string;
 }
 
@@ -77,20 +77,20 @@ export interface Role {
   color: string;
 }
 
-type TabType = 'welcome' | 'levels' | 'embeds';
+type TabType = "welcome" | "levels" | "embeds";
 
 const tabs = [
-  { id: 'welcome' as TabType, label: 'Karşılama & Veda', icon: MessageSquare },
-  { id: 'levels' as TabType, label: 'Seviye Sistemi', icon: TrendingUp },
-  { id: 'embeds' as TabType, label: 'Gömülü Mesajlar', icon: Palette },
+  { id: "welcome" as TabType, label: "Karşılama & Veda", icon: MessageSquare },
+  { id: "levels" as TabType, label: "Seviye Sistemi", icon: TrendingUp },
+  { id: "embeds" as TabType, label: "Gömülü Mesajlar", icon: Palette },
 ];
 
 export function ServerDashboard() {
   const { serverId } = useParams<{ serverId: string }>();
   const navigate = useNavigate();
   const { isLoggedIn, isLoading: authLoading } = useAuth();
-  
-  const [activeTab, setActiveTab] = useState<TabType>('welcome');
+
+  const [activeTab, setActiveTab] = useState<TabType>("welcome");
   const [settings, setSettings] = useState<ServerSettings | null>(null);
   const [channels, setChannels] = useState<Channel[]>([]);
   const [roles, setRoles] = useState<Role[]>([]);
@@ -107,14 +107,20 @@ export function ServerDashboard() {
 
       try {
         const [settingsRes, channelsRes, rolesRes] = await Promise.all([
-          fetch(`http://localhost:3001/api/server/${serverId}/settings`, { credentials: 'include' }),
-          fetch(`http://localhost:3001/api/server/${serverId}/channels`, { credentials: 'include' }),
-          fetch(`http://localhost:3001/api/server/${serverId}/roles`, { credentials: 'include' }),
+          fetch(`http://localhost:3001/api/server/${serverId}/settings`, {
+            credentials: "include",
+          }),
+          fetch(`http://localhost:3001/api/server/${serverId}/channels`, {
+            credentials: "include",
+          }),
+          fetch(`http://localhost:3001/api/server/${serverId}/roles`, {
+            credentials: "include",
+          }),
         ]);
 
         if (!settingsRes.ok) {
           const err = await settingsRes.json();
-          throw new Error(err.error || 'Ayarlar yüklenemedi');
+          throw new Error(err.error || "Ayarlar yüklenemedi");
         }
 
         const [settingsData, channelsData, rolesData] = await Promise.all([
@@ -127,8 +133,8 @@ export function ServerDashboard() {
         setChannels(channelsData.channels || []);
         setRoles(rolesData.roles || []);
       } catch (err: any) {
-        console.error('Failed to fetch settings:', err);
-        setError(err.message || 'Ayarlar yüklenemedi');
+        console.error("Failed to fetch settings:", err);
+        setError(err.message || "Ayarlar yüklenemedi");
       } finally {
         setIsLoading(false);
       }
@@ -141,12 +147,12 @@ export function ServerDashboard() {
     const handleBeforeUnload = (e: BeforeUnloadEvent) => {
       if (hasUnsavedChanges) {
         e.preventDefault();
-        e.returnValue = '';
+        e.returnValue = "";
       }
     };
 
-    window.addEventListener('beforeunload', handleBeforeUnload);
-    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+    window.addEventListener("beforeunload", handleBeforeUnload);
+    return () => window.removeEventListener("beforeunload", handleBeforeUnload);
   }, [hasUnsavedChanges]);
 
   if (authLoading) {
@@ -162,9 +168,13 @@ export function ServerDashboard() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <Shield className="w-16 h-16 text-red-400 mx-auto mb-4" />
-          <h1 className="text-2xl font-bold text-white mb-2">Yetkisiz Erişim</h1>
-          <p className="text-slate-400 mb-6">Bu sayfayı görüntülemek için giriş yapmalısınız.</p>
-          <Button onClick={() => navigate('/dashboard')}>Giriş Yap</Button>
+          <h1 className="text-2xl font-bold text-white mb-2">
+            Yetkisiz Erişim
+          </h1>
+          <p className="text-slate-400 mb-6">
+            Bu sayfayı görüntülemek için giriş yapmalısınız.
+          </p>
+          <Button onClick={() => navigate("/dashboard")}>Giriş Yap</Button>
         </div>
       </div>
     );
@@ -189,11 +199,13 @@ export function ServerDashboard() {
           <h1 className="text-2xl font-bold text-white mb-2">Hata</h1>
           <p className="text-slate-400 mb-6">{error}</p>
           <div className="flex gap-3 justify-center">
-            <Button variant="secondary" onClick={() => navigate('/dashboard')}>
+            <Button variant="secondary" onClick={() => navigate("/dashboard")}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Geri Dön
             </Button>
-            <Button onClick={() => window.location.reload()}>Tekrar Dene</Button>
+            <Button onClick={() => window.location.reload()}>
+              Tekrar Dene
+            </Button>
           </div>
         </div>
       </div>
@@ -207,13 +219,13 @@ export function ServerDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8">
           <button
-            onClick={() => navigate('/dashboard')}
+            onClick={() => navigate("/dashboard")}
             className="flex items-center gap-2 text-slate-400 hover:text-white transition-colors mb-4"
           >
             <ArrowLeft className="w-4 h-4" />
             Dashboard'a Dön
           </button>
-          
+
           <div className="flex items-center gap-4">
             {settings.guild.icon ? (
               <img
@@ -227,7 +239,9 @@ export function ServerDashboard() {
               </div>
             )}
             <div>
-              <h1 className="text-2xl font-bold text-white">{settings.guild.name}</h1>
+              <h1 className="text-2xl font-bold text-white">
+                {settings.guild.name}
+              </h1>
               <p className="text-slate-400 text-sm flex items-center gap-2">
                 <Shield className="w-4 h-4 text-green-400" />
                 Bu sunucuyu yönetiyorsunuz
@@ -242,13 +256,17 @@ export function ServerDashboard() {
               {tabs.map((tab) => {
                 const Icon = tab.icon;
                 const isActive = activeTab === tab.id;
-                
+
                 return (
                   <button
                     key={tab.id}
                     onClick={() => {
                       if (hasUnsavedChanges) {
-                        if (confirm('Kaydedilmemiş değişiklikler var. Devam etmek istiyor musunuz?')) {
+                        if (
+                          confirm(
+                            "Kaydedilmemiş değişiklikler var. Devam etmek istiyor musunuz?"
+                          )
+                        ) {
                           setHasUnsavedChanges(false);
                           setActiveTab(tab.id);
                         }
@@ -258,8 +276,8 @@ export function ServerDashboard() {
                     }}
                     className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all ${
                       isActive
-                        ? 'bg-[#675de6] text-white'
-                        : 'text-slate-400 hover:text-white hover:bg-white/5'
+                        ? "bg-[#675de6] text-white"
+                        : "text-slate-400 hover:text-white hover:bg-white/5"
                     }`}
                   >
                     <Icon className="w-5 h-5" />
@@ -271,7 +289,9 @@ export function ServerDashboard() {
 
             {hasUnsavedChanges && (
               <div className="mt-4 p-3 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
-                <p className="text-yellow-400 text-sm">Kaydedilmemiş değişiklikler var</p>
+                <p className="text-yellow-400 text-sm">
+                  Kaydedilmemiş değişiklikler var
+                </p>
               </div>
             )}
           </aside>
@@ -285,7 +305,7 @@ export function ServerDashboard() {
                 exit={{ opacity: 0, y: -10 }}
                 transition={{ duration: 0.2 }}
               >
-                {activeTab === 'welcome' && (
+                {activeTab === "welcome" && (
                   <WelcomeSettings
                     serverId={serverId!}
                     welcome={settings.welcome}
@@ -298,7 +318,7 @@ export function ServerDashboard() {
                   />
                 )}
 
-                {activeTab === 'levels' && (
+                {activeTab === "levels" && (
                   <LevelSettings
                     serverId={serverId!}
                     data={settings.levels}
@@ -311,7 +331,7 @@ export function ServerDashboard() {
                   />
                 )}
 
-                {activeTab === 'embeds' && (
+                {activeTab === "embeds" && (
                   <EmbedBuilder
                     serverId={serverId!}
                     embeds={settings.embeds}
@@ -321,7 +341,6 @@ export function ServerDashboard() {
                     }}
                   />
                 )}
-
               </motion.div>
             </AnimatePresence>
           </main>

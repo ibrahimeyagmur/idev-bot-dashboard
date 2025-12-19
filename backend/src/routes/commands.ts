@@ -1,5 +1,5 @@
-import { Router } from 'express';
-import db from 'croxydb';
+import { Router } from "express";
+import db from "croxydb";
 
 const router = Router();
 
@@ -11,12 +11,12 @@ interface Command {
   examples: string[];
 }
 
-router.get('/', (req, res) => {
+router.get("/", (req, res) => {
   const { search, category } = req.query;
-  
-  let commands: Command[] = db.get('commands') || [];
 
-  if (search && typeof search === 'string') {
+  let commands: Command[] = db.get("commands") || [];
+
+  if (search && typeof search === "string") {
     const searchLower = search.toLowerCase();
     commands = commands.filter(
       (cmd) =>
@@ -25,16 +25,16 @@ router.get('/', (req, res) => {
     );
   }
 
-  if (category && typeof category === 'string' && category !== 'Tümü') {
+  if (category && typeof category === "string" && category !== "Tümü") {
     commands = commands.filter((cmd) => cmd.category === category);
   }
 
   res.json(commands);
 });
 
-router.get('/categories', (req, res) => {
-  const commands: Command[] = db.get('commands') || [];
-  const categories = ['Tümü', ...new Set(commands.map((cmd) => cmd.category))];
+router.get("/categories", (req, res) => {
+  const commands: Command[] = db.get("commands") || [];
+  const categories = ["Tümü", ...new Set(commands.map((cmd) => cmd.category))];
   res.json(categories);
 });
 

@@ -1,43 +1,94 @@
-import { useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { motion, useMotionValue, useSpring, useTransform } from 'framer-motion';
-import { 
-  MessageSquare, 
-  TrendingUp, 
-  FileText, 
-  Shield, 
+import { useRef } from "react";
+import { useNavigate } from "react-router-dom";
+import { motion, useMotionValue, useSpring, useTransform } from "framer-motion";
+import {
+  MessageSquare,
+  TrendingUp,
+  FileText,
+  Shield,
   MessageCircle,
   Users,
   ClipboardList,
-  Layout
-} from 'lucide-react';
-import { useAuth } from '../../context/AuthContext';
+  Layout,
+} from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
 
 const modules = [
-  { id: 'welcome', label: 'Karşılama & Veda', icon: MessageSquare, color: '#22c55e', path: 'welcome' },
-  { id: 'levels', label: 'Seviye Sistemi', icon: TrendingUp, color: '#675de6', path: 'levels' },
-  { id: 'embeds', label: 'Gömülü Mesajlar', icon: FileText, color: '#a855f7', path: 'embeds' },
-  { id: 'roles', label: 'Tepki Rolleri', icon: Users, color: '#f59e0b', path: 'roles', coming: true },
-  { id: 'automod', label: 'Otomatik Moderasyon', icon: Shield, color: '#ef4444', path: 'automod' },
-  { id: 'autoreply', label: 'Otomatik Cevap', icon: MessageCircle, color: '#06b6d4', path: 'autoreply' },
-  { id: 'logs', label: 'Log / Denetim', icon: ClipboardList, color: '#64748b', path: 'logs', coming: true },
-  { id: 'templates', label: 'Şablonlar', icon: Layout, color: '#ec4899', path: 'templates', coming: true },
+  {
+    id: "welcome",
+    label: "Karşılama & Veda",
+    icon: MessageSquare,
+    color: "#22c55e",
+    path: "welcome",
+  },
+  {
+    id: "levels",
+    label: "Seviye Sistemi",
+    icon: TrendingUp,
+    color: "#675de6",
+    path: "levels",
+  },
+  {
+    id: "embeds",
+    label: "Gömülü Mesajlar",
+    icon: FileText,
+    color: "#a855f7",
+    path: "embeds",
+  },
+  {
+    id: "roles",
+    label: "Tepki Rolleri",
+    icon: Users,
+    color: "#f59e0b",
+    path: "roles",
+    coming: true,
+  },
+  {
+    id: "automod",
+    label: "Otomatik Moderasyon",
+    icon: Shield,
+    color: "#ef4444",
+    path: "automod",
+  },
+  {
+    id: "autoreply",
+    label: "Otomatik Cevap",
+    icon: MessageCircle,
+    color: "#06b6d4",
+    path: "autoreply",
+  },
+  {
+    id: "logs",
+    label: "Log / Denetim",
+    icon: ClipboardList,
+    color: "#64748b",
+    path: "logs",
+    coming: true,
+  },
+  {
+    id: "templates",
+    label: "Şablonlar",
+    icon: Layout,
+    color: "#ec4899",
+    path: "templates",
+    coming: true,
+  },
 ];
 
 export function ModulePillMarquee() {
   const containerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const { isLoggedIn } = useAuth();
-  
+
   const x = useMotionValue(0);
   const springX = useSpring(x, { stiffness: 300, damping: 30 });
 
-  const handleModuleClick = (module: typeof modules[0]) => {
+  const handleModuleClick = (module: (typeof modules)[0]) => {
     if (module.coming) return;
     if (isLoggedIn) {
       navigate(`/dashboard`);
     } else {
-      navigate('/dashboard');
+      navigate("/dashboard");
     }
   };
 
@@ -59,12 +110,10 @@ export function ModulePillMarquee() {
         </motion.div>
       </div>
 
-      {/* Draggable Container */}
-      <div 
+      <div
         ref={containerRef}
         className="relative cursor-grab active:cursor-grabbing select-none"
       >
-        {/* Gradient Masks */}
         <div className="absolute left-0 top-0 bottom-0 w-32 bg-gradient-to-r from-[#12131a] to-transparent z-10 pointer-events-none" />
         <div className="absolute right-0 top-0 bottom-0 w-32 bg-gradient-to-l from-[#12131a] to-transparent z-10 pointer-events-none" />
 
@@ -83,9 +132,9 @@ export function ModulePillMarquee() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.05 }}
-                whileHover={{ 
+                whileHover={{
                   scale: 1.05,
-                  boxShadow: `0 0 30px ${module.color}30`
+                  boxShadow: `0 0 30px ${module.color}30`,
                 }}
                 whileTap={{ scale: 0.98 }}
                 onClick={() => handleModuleClick(module)}
@@ -93,21 +142,24 @@ export function ModulePillMarquee() {
                   relative flex-shrink-0 flex items-center gap-3 px-6 py-4 
                   bg-[#171821] rounded-2xl border border-white/10
                   transition-colors group
-                  ${module.coming ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer hover:border-white/20'}
+                  ${
+                    module.coming
+                      ? "opacity-60 cursor-not-allowed"
+                      : "cursor-pointer hover:border-white/20"
+                  }
                 `}
                 style={{
-                  boxShadow: `0 0 0 1px ${module.color}10`
+                  boxShadow: `0 0 0 1px ${module.color}10`,
                 }}
               >
-                {/* Glow on hover */}
-                <div 
+                <div
                   className="absolute inset-0 rounded-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300"
                   style={{
-                    background: `radial-gradient(circle at center, ${module.color}10 0%, transparent 70%)`
+                    background: `radial-gradient(circle at center, ${module.color}10 0%, transparent 70%)`,
                   }}
                 />
 
-                <div 
+                <div
                   className="relative w-12 h-12 rounded-xl flex items-center justify-center transition-transform group-hover:scale-110"
                   style={{ backgroundColor: `${module.color}20` }}
                 >
@@ -134,7 +186,6 @@ export function ModulePillMarquee() {
         </motion.div>
       </div>
 
-      {/* Hint */}
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}

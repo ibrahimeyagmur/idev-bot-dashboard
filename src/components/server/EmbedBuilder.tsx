@@ -1,8 +1,8 @@
-import { useState } from 'react';
-import { motion, AnimatePresence, Reorder } from 'framer-motion';
-import { 
-  Save, 
-  Loader2, 
+import { useState } from "react";
+import { motion, AnimatePresence, Reorder } from "framer-motion";
+import {
+  Save,
+  Loader2,
   Plus,
   Trash2,
   GripVertical,
@@ -16,11 +16,11 @@ import {
   Check,
   Copy,
   Send,
-  Hash
-} from 'lucide-react';
-import { Button } from '../ui/Button';
-import { DiscordMessagePreview } from './DiscordMessagePreview';
-import type { EmbedData, Channel } from '../../pages/ServerDashboard';
+  Hash,
+} from "lucide-react";
+import { Button } from "../ui/Button";
+import { DiscordMessagePreview } from "./DiscordMessagePreview";
+import type { EmbedData, Channel } from "../../pages/ServerDashboard";
 
 interface Props {
   serverId: string;
@@ -35,13 +35,13 @@ interface EmbedField {
   inline: boolean;
 }
 
-const defaultEmbed: Omit<EmbedData, 'id'> = {
-  title: '',
-  description: '',
-  color: '#5865F2',
-  thumbnail: '',
-  image: '',
-  footer: '',
+const defaultEmbed: Omit<EmbedData, "id"> = {
+  title: "",
+  description: "",
+  color: "#5865F2",
+  thumbnail: "",
+  image: "",
+  footer: "",
   fields: [],
 };
 
@@ -53,25 +53,25 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
   const [copied, setCopied] = useState(false);
   const [sending, setSending] = useState(false);
   const [sent, setSent] = useState(false);
-  const [sendChannelId, setSendChannelId] = useState('');
+  const [sendChannelId, setSendChannelId] = useState("");
   const [showSendModal, setShowSendModal] = useState(false);
   const [sendingEmbedId, setSendingEmbedId] = useState<string | null>(null);
-  const [sendError, setSendError] = useState('');
+  const [sendError, setSendError] = useState("");
 
-  // Convert embed to Discord API format JSON
   const getEmbedJson = (embed: EmbedData) => {
     const discordEmbed: any = {};
     if (embed.title) discordEmbed.title = embed.title;
     if (embed.description) discordEmbed.description = embed.description;
-    if (embed.color) discordEmbed.color = parseInt(embed.color.replace('#', ''), 16);
+    if (embed.color)
+      discordEmbed.color = parseInt(embed.color.replace("#", ""), 16);
     if (embed.thumbnail) discordEmbed.thumbnail = { url: embed.thumbnail };
     if (embed.image) discordEmbed.image = { url: embed.image };
     if (embed.footer) discordEmbed.footer = { text: embed.footer };
     if (embed.fields && embed.fields.length > 0) {
-      discordEmbed.fields = embed.fields.map(f => ({
-        name: f.name || '\u200b',
-        value: f.value || '\u200b',
-        inline: f.inline
+      discordEmbed.fields = embed.fields.map((f) => ({
+        name: f.name || "\u200b",
+        value: f.value || "\u200b",
+        inline: f.inline,
       }));
     }
     return JSON.stringify({ embeds: [discordEmbed] }, null, 2);
@@ -85,37 +85,40 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
 
   const openSendModal = (embedId: string) => {
     setSendingEmbedId(embedId);
-    setSendChannelId('');
-    setSendError('');
+    setSendChannelId("");
+    setSendError("");
     setShowSendModal(true);
   };
 
   const sendEmbed = async () => {
     if (!sendingEmbedId || !sendChannelId) return;
-    
+
     setSending(true);
-    setSendError('');
+    setSendError("");
     try {
-      const res = await fetch(`http://localhost:3001/api/server/${serverId}/embeds/${sendingEmbedId}/send`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify({ channelId: sendChannelId }),
-      });
-      
+      const res = await fetch(
+        `http://localhost:3001/api/server/${serverId}/embeds/${sendingEmbedId}/send`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ channelId: sendChannelId }),
+        }
+      );
+
       const data = await res.json();
-      
+
       if (res.ok) {
         setShowSendModal(false);
         setSendingEmbedId(null);
         setSent(true);
         setTimeout(() => setSent(false), 3000);
       } else {
-        setSendError(data.error || 'Embed gönderilemedi');
+        setSendError(data.error || "Embed gönderilemedi");
       }
     } catch (err) {
-      console.error('Failed to send embed:', err);
-      setSendError('Bağlantı hatası');
+      console.error("Failed to send embed:", err);
+      setSendError("Bağlantı hatası");
     } finally {
       setSending(false);
     }
@@ -123,7 +126,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
 
   const createEmbed = () => {
     setEditingEmbed({
-      id: '',
+      id: "",
       ...defaultEmbed,
     });
     setIsCreating(true);
@@ -131,26 +134,26 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
 
   const saveEmbed = async () => {
     if (!editingEmbed) return;
-    
+
     setSaving(true);
     try {
       const url = isCreating
         ? `http://localhost:3001/api/server/${serverId}/embeds`
         : `http://localhost:3001/api/server/${serverId}/embeds/${editingEmbed.id}`;
-      
+
       const res = await fetch(url, {
-        method: isCreating ? 'POST' : 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
+        method: isCreating ? "POST" : "PUT",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(editingEmbed),
       });
-      
+
       if (res.ok) {
         const { data } = await res.json();
         if (isCreating) {
           onUpdate([...embeds, data]);
         } else {
-          onUpdate(embeds.map(e => e.id === data.id ? data : e));
+          onUpdate(embeds.map((e) => (e.id === data.id ? data : e)));
         }
         setSaved(true);
         setTimeout(() => {
@@ -160,26 +163,29 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         }, 1000);
       }
     } catch (err) {
-      console.error('Failed to save embed:', err);
+      console.error("Failed to save embed:", err);
     } finally {
       setSaving(false);
     }
   };
 
   const deleteEmbed = async (id: string) => {
-    if (!confirm('Bu gömülü mesajı silmek istediğinize emin misiniz?')) return;
-    
+    if (!confirm("Bu gömülü mesajı silmek istediğinize emin misiniz?")) return;
+
     try {
-      const res = await fetch(`http://localhost:3001/api/server/${serverId}/embeds/${id}`, {
-        method: 'DELETE',
-        credentials: 'include',
-      });
-      
+      const res = await fetch(
+        `http://localhost:3001/api/server/${serverId}/embeds/${id}`,
+        {
+          method: "DELETE",
+          credentials: "include",
+        }
+      );
+
       if (res.ok) {
-        onUpdate(embeds.filter(e => e.id !== id));
+        onUpdate(embeds.filter((e) => e.id !== id));
       }
     } catch (err) {
-      console.error('Failed to delete embed:', err);
+      console.error("Failed to delete embed:", err);
     }
   };
 
@@ -187,7 +193,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
     if (!editingEmbed) return;
     setEditingEmbed({
       ...editingEmbed,
-      fields: [...editingEmbed.fields, { name: '', value: '', inline: false }],
+      fields: [...editingEmbed.fields, { name: "", value: "", inline: false }],
     });
   };
 
@@ -213,7 +219,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
 
   return (
     <div className="space-y-6">
-      {/* Header */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -225,8 +230,12 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
               <Palette className="w-5 h-5 text-blue-400" />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-white">Gömülü Mesajlar</h2>
-              <p className="text-sm text-slate-400">Özelleştirilmiş Discord embed mesajları oluşturun</p>
+              <h2 className="text-lg font-semibold text-white">
+                Gömülü Mesajlar
+              </h2>
+              <p className="text-sm text-slate-400">
+                Özelleştirilmiş Discord embed mesajları oluşturun
+              </p>
             </div>
           </div>
           <Button onClick={createEmbed}>
@@ -236,7 +245,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         </div>
       </motion.div>
 
-      {/* Embed List */}
       {embeds.length === 0 && !editingEmbed ? (
         <motion.div
           initial={{ opacity: 0 }}
@@ -244,8 +252,12 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
           className="bg-surface border border-dashed border-white/10 rounded-xl p-12 text-center"
         >
           <Palette className="w-12 h-12 text-slate-500 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-white mb-2">Henüz embed yok</h3>
-          <p className="text-slate-400 text-sm mb-4">İlk gömülü mesajınızı oluşturun</p>
+          <h3 className="text-lg font-medium text-white mb-2">
+            Henüz embed yok
+          </h3>
+          <p className="text-slate-400 text-sm mb-4">
+            İlk gömülü mesajınızı oluşturun
+          </p>
           <Button onClick={createEmbed}>
             <Plus className="w-4 h-4 mr-2" />
             Embed Oluştur
@@ -267,10 +279,10 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                 />
                 <div className="flex-1 min-w-0">
                   <h4 className="font-medium text-white truncate">
-                    {embed.title || 'Başlıksız Embed'}
+                    {embed.title || "Başlıksız Embed"}
                   </h4>
                   <p className="text-sm text-slate-400 line-clamp-2 mt-1">
-                    {embed.description || 'Açıklama yok'}
+                    {embed.description || "Açıklama yok"}
                   </p>
                   <div className="flex items-center gap-4 mt-2 text-xs text-slate-500">
                     {embed.fields.length > 0 && (
@@ -318,7 +330,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         </div>
       )}
 
-      {/* Editor Modal */}
       <AnimatePresence>
         {editingEmbed && (
           <motion.div
@@ -338,10 +349,9 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
               onClick={(e) => e.stopPropagation()}
               className="bg-[#12131a] border border-white/10 rounded-xl w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col"
             >
-              {/* Modal Header */}
               <div className="p-4 border-b border-white/10 flex items-center justify-between">
                 <h3 className="text-lg font-semibold text-white">
-                  {isCreating ? 'Yeni Embed Oluştur' : 'Embed Düzenle'}
+                  {isCreating ? "Yeni Embed Oluştur" : "Embed Düzenle"}
                 </h3>
                 <button
                   onClick={() => {
@@ -354,12 +364,9 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                 </button>
               </div>
 
-              {/* Modal Content */}
               <div className="flex-1 overflow-y-auto p-4">
                 <div className="grid lg:grid-cols-2 gap-6">
-                  {/* Editor */}
                   <div className="space-y-4">
-                    {/* Title */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                         <Type className="w-4 h-4" />
@@ -368,13 +375,17 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                       <input
                         type="text"
                         value={editingEmbed.title}
-                        onChange={(e) => setEditingEmbed({ ...editingEmbed, title: e.target.value })}
+                        onChange={(e) =>
+                          setEditingEmbed({
+                            ...editingEmbed,
+                            title: e.target.value,
+                          })
+                        }
                         className="w-full px-4 py-2.5 bg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50"
                         placeholder="Embed başlığı"
                       />
                     </div>
 
-                    {/* Description */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                         <FileText className="w-4 h-4" />
@@ -382,14 +393,18 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                       </label>
                       <textarea
                         value={editingEmbed.description}
-                        onChange={(e) => setEditingEmbed({ ...editingEmbed, description: e.target.value })}
+                        onChange={(e) =>
+                          setEditingEmbed({
+                            ...editingEmbed,
+                            description: e.target.value,
+                          })
+                        }
                         rows={4}
                         className="w-full px-4 py-3 bg-surface border border-white/10 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-accent/50 resize-none"
                         placeholder="Embed açıklaması"
                       />
                     </div>
 
-                    {/* Color */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                         <Palette className="w-4 h-4" />
@@ -399,20 +414,29 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                         <input
                           type="color"
                           value={editingEmbed.color}
-                          onChange={(e) => setEditingEmbed({ ...editingEmbed, color: e.target.value })}
+                          onChange={(e) =>
+                            setEditingEmbed({
+                              ...editingEmbed,
+                              color: e.target.value,
+                            })
+                          }
                           className="w-12 h-10 rounded-lg cursor-pointer border-0"
                         />
                         <input
                           type="text"
                           value={editingEmbed.color}
-                          onChange={(e) => setEditingEmbed({ ...editingEmbed, color: e.target.value })}
+                          onChange={(e) =>
+                            setEditingEmbed({
+                              ...editingEmbed,
+                              color: e.target.value,
+                            })
+                          }
                           className="flex-1 px-4 py-2.5 bg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50"
                           placeholder="#5865F2"
                         />
                       </div>
                     </div>
 
-                    {/* Images */}
                     <div className="grid grid-cols-2 gap-4">
                       <div>
                         <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
@@ -422,7 +446,12 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                         <input
                           type="text"
                           value={editingEmbed.thumbnail}
-                          onChange={(e) => setEditingEmbed({ ...editingEmbed, thumbnail: e.target.value })}
+                          onChange={(e) =>
+                            setEditingEmbed({
+                              ...editingEmbed,
+                              thumbnail: e.target.value,
+                            })
+                          }
                           className="w-full px-4 py-2.5 bg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50"
                           placeholder="https://..."
                         />
@@ -435,14 +464,18 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                         <input
                           type="text"
                           value={editingEmbed.image}
-                          onChange={(e) => setEditingEmbed({ ...editingEmbed, image: e.target.value })}
+                          onChange={(e) =>
+                            setEditingEmbed({
+                              ...editingEmbed,
+                              image: e.target.value,
+                            })
+                          }
                           className="w-full px-4 py-2.5 bg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50"
                           placeholder="https://..."
                         />
                       </div>
                     </div>
 
-                    {/* Footer */}
                     <div>
                       <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                         <FileText className="w-4 h-4" />
@@ -451,20 +484,28 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                       <input
                         type="text"
                         value={editingEmbed.footer}
-                        onChange={(e) => setEditingEmbed({ ...editingEmbed, footer: e.target.value })}
+                        onChange={(e) =>
+                          setEditingEmbed({
+                            ...editingEmbed,
+                            footer: e.target.value,
+                          })
+                        }
                         className="w-full px-4 py-2.5 bg-surface border border-white/10 rounded-lg text-white focus:outline-none focus:border-accent/50"
                         placeholder="Footer metni"
                       />
                     </div>
 
-                    {/* Fields */}
                     <div>
                       <div className="flex items-center justify-between mb-2">
                         <label className="flex items-center gap-2 text-sm font-medium text-slate-300">
                           <LayoutList className="w-4 h-4" />
                           Alanlar
                         </label>
-                        <Button variant="secondary" size="sm" onClick={addField}>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={addField}
+                        >
                           <Plus className="w-4 h-4 mr-1" />
                           Alan Ekle
                         </Button>
@@ -489,14 +530,22 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                                   <input
                                     type="text"
                                     value={field.name}
-                                    onChange={(e) => updateField(index, { name: e.target.value })}
+                                    onChange={(e) =>
+                                      updateField(index, {
+                                        name: e.target.value,
+                                      })
+                                    }
                                     className="w-full px-3 py-2 bg-[#12131a] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent/50"
                                     placeholder="Alan adı"
                                   />
                                   <input
                                     type="text"
                                     value={field.value}
-                                    onChange={(e) => updateField(index, { value: e.target.value })}
+                                    onChange={(e) =>
+                                      updateField(index, {
+                                        value: e.target.value,
+                                      })
+                                    }
                                     className="w-full px-3 py-2 bg-[#12131a] border border-white/10 rounded-lg text-white text-sm focus:outline-none focus:border-accent/50"
                                     placeholder="Alan değeri"
                                   />
@@ -504,7 +553,11 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                                     <input
                                       type="checkbox"
                                       checked={field.inline}
-                                      onChange={(e) => updateField(index, { inline: e.target.checked })}
+                                      onChange={(e) =>
+                                        updateField(index, {
+                                          inline: e.target.checked,
+                                        })
+                                      }
                                       className="rounded border-slate-600"
                                     />
                                     Satır içi
@@ -522,15 +575,18 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                         </Reorder.Group>
                       ) : (
                         <div className="text-center py-4 bg-surface border border-dashed border-white/10 rounded-lg">
-                          <p className="text-sm text-slate-400">Henüz alan eklenmemiş</p>
+                          <p className="text-sm text-slate-400">
+                            Henüz alan eklenmemiş
+                          </p>
                         </div>
                       )}
                     </div>
                   </div>
 
-                  {/* Preview */}
                   <div>
-                    <label className="block text-sm font-medium text-slate-300 mb-2">Önizleme</label>
+                    <label className="block text-sm font-medium text-slate-300 mb-2">
+                      Önizleme
+                    </label>
                     <DiscordMessagePreview
                       type="embed"
                       content={editingEmbed.description}
@@ -545,14 +601,17 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                 </div>
               </div>
 
-              {/* Modal Footer */}
               <div className="p-4 border-t border-white/10 flex justify-between">
                 <Button
                   variant="secondary"
                   onClick={() => copyJson(editingEmbed)}
                 >
-                  {copied ? <Check className="w-4 h-4 mr-2" /> : <Copy className="w-4 h-4 mr-2" />}
-                  {copied ? 'Kopyalandı!' : 'JSON Kopyala'}
+                  {copied ? (
+                    <Check className="w-4 h-4 mr-2" />
+                  ) : (
+                    <Copy className="w-4 h-4 mr-2" />
+                  )}
+                  {copied ? "Kopyalandı!" : "JSON Kopyala"}
                 </Button>
                 <div className="flex gap-3">
                   <Button
@@ -572,7 +631,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                     ) : (
                       <Save className="w-4 h-4 mr-2" />
                     )}
-                    {saved ? 'Kaydedildi!' : 'Kaydet'}
+                    {saved ? "Kaydedildi!" : "Kaydet"}
                   </Button>
                 </div>
               </div>
@@ -581,7 +640,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Send to Channel Modal */}
       <AnimatePresence>
         {showSendModal && (
           <motion.div
@@ -602,7 +660,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                 <Send className="w-5 h-5 text-blue-400" />
                 Embed Gönder
               </h3>
-              
+
               <div className="mb-4">
                 <label className="flex items-center gap-2 text-sm font-medium text-slate-300 mb-2">
                   <Hash className="w-4 h-4" />
@@ -615,7 +673,9 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                 >
                   <option value="">Kanal seçin</option>
                   {channels.map((ch) => (
-                    <option key={ch.id} value={ch.id}>#{ch.name}</option>
+                    <option key={ch.id} value={ch.id}>
+                      #{ch.name}
+                    </option>
                   ))}
                 </select>
               </div>
@@ -627,10 +687,16 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
               )}
 
               <div className="flex justify-end gap-3">
-                <Button variant="secondary" onClick={() => setShowSendModal(false)}>
+                <Button
+                  variant="secondary"
+                  onClick={() => setShowSendModal(false)}
+                >
                   İptal
                 </Button>
-                <Button onClick={sendEmbed} disabled={sending || !sendChannelId}>
+                <Button
+                  onClick={sendEmbed}
+                  disabled={sending || !sendChannelId}
+                >
                   {sending ? (
                     <Loader2 className="w-4 h-4 animate-spin mr-2" />
                   ) : (
@@ -644,7 +710,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Copied Toast */}
       <AnimatePresence>
         {copied && (
           <motion.div
@@ -659,7 +724,6 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
         )}
       </AnimatePresence>
 
-      {/* Sent Toast */}
       <AnimatePresence>
         {sent && (
           <motion.div

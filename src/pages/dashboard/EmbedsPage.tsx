@@ -1,8 +1,8 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { useDashboardInit } from '../../context/DashboardContext';
-import { EmbedBuilder } from '../../components/server/EmbedBuilder';
-import { Loader2 } from 'lucide-react';
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useDashboardInit } from "../../context/DashboardContext";
+import { EmbedBuilder } from "../../components/server/EmbedBuilder";
+import { Loader2 } from "lucide-react";
 
 interface EmbedData {
   id: string;
@@ -17,11 +17,14 @@ interface EmbedData {
 
 export function EmbedsPage() {
   const { serverId } = useParams();
-  const { channels, settings, isLoading: contextLoading } = useDashboardInit(serverId);
+  const {
+    channels,
+    settings,
+    isLoading: contextLoading,
+  } = useDashboardInit(serverId);
   const [embeds, setEmbeds] = useState<EmbedData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  // Use cached data from context
   useEffect(() => {
     if (!contextLoading && settings) {
       setEmbeds((settings as any).embeds || []);

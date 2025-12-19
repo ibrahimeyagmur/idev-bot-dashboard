@@ -1,15 +1,17 @@
-import { Router } from 'express';
-import axios from 'axios';
-import db from 'croxydb';
-import { getDiscordUser, getAvatarUrl } from '../services/discordApi';
+import { Router } from "express";
+import axios from "axios";
+import db from "croxydb";
+import { getDiscordUser, getAvatarUrl } from "../services/discordApi";
 
 const router = Router();
 
-router.get('/discord', (req, res) => {
+router.get("/discord", (req, res) => {
   const clientId = process.env.DISCORD_CLIENT_ID;
   const redirectUri = process.env.DISCORD_REDIRECT_URI;
-  const scope = 'identify guilds';
-  const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(redirectUri || '')}&response_type=code&scope=${encodeURIComponent(scope)}`;
+  const scope = "identify guilds";
+  const authUrl = `https://discord.com/api/oauth2/authorize?client_id=${clientId}&redirect_uri=${encodeURIComponent(
+    redirectUri || ""
+  )}&response_type=code&scope=${encodeURIComponent(scope)}`;
   res.redirect(authUrl);
 });
 
@@ -17,36 +19,41 @@ async function exchangeCodeForToken(code: string, retries = 0): Promise<any> {
   const MAX_RETRIES = 3;
   try {
     const response = await axios.post(
-      'https://discord.com/api/oauth2/token',
+      "https://discord.com/api/oauth2/token",
       new URLSearchParams({
-        client_id: process.env.DISCORD_CLIENT_ID || '',
-        client_secret: process.env.DISCORD_CLIENT_SECRET || '',
-        grant_type: 'authorization_code',
+        client_id: process.env.DISCORD_CLIENT_ID || "",
+        client_secret: process.env.DISCORD_CLIENT_SECRET || "",
+        grant_type: "authorization_code",
         code,
-        redirect_uri: process.env.DISCORD_REDIRECT_URI || '',
+        redirect_uri: process.env.DISCORD_REDIRECT_URI || "",
       }),
       {
         headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
+          "Content-Type": "application/x-www-form-urlencoded",
         },
       }
     );
     return response.data;
   } catch (error: any) {
-    if ((error.response?.status === 429 || error.response?.status === 400) && retries < MAX_RETRIES) {
+    if (
+      (error.response?.status === 429 || error.response?.status === 400) &&
+      retries < MAX_RETRIES
+    ) {
       const retryAfter = error.response?.data?.retry_after || 2;
-      await new Promise(resolve => setTimeout(resolve, retryAfter * 1000 + 500));
+      await new Promise((resolve) =>
+        setTimeout(resolve, retryAfter * 1000 + 500)
+      );
       return exchangeCodeForToken(code, retries + 1);
     }
     throw error;
   }
 }
 
-router.get('/discord/callback', async (req, res) => {
+router.get("/discord/callback", async (req, res) => {
   const { code } = req.query;
-  const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+  const frontendUrl = process.env.FRONTEND_URL || "http://localhost:5173";
 
-  if (!code || typeof code !== 'string') {
+  if (!code || typeof code !== "string") {
     return res.redirect(`${frontendUrl}?error=no_code`);
   }
 
@@ -72,20 +79,20 @@ router.get('/discord/callback', async (req, res) => {
 
     res.redirect(frontendUrl);
   } catch (error) {
-    console.error('OAuth error:', error);
+    console.error("OAuth error:", error);
     res.redirect(`${frontendUrl}?error=oauth_failed`);
   }
 });
 
-router.get('/me', (req, res) => {
+router.get("/me", (req, res) => {
   if (!req.session.userId) {
-    return res.status(401).json({ error: 'Not authenticated' });
+    return res.status(401).json({ error: "Not authenticated" });
   }
 
   const user = db.get(`users.${req.session.userId}`);
   if (!user) {
     req.session.destroy(() => {});
-    return res.status(401).json({ error: 'User not found' });
+    return res.status(401).json({ error: "User not found" });
   }
 
   res.json({
@@ -96,12 +103,12 @@ router.get('/me', (req, res) => {
   });
 });
 
-router.post('/logout', (req, res) => {
+router.post("/logout", (req, res) => {
   req.session.destroy((err) => {
     if (err) {
-      return res.status(500).json({ error: 'Failed to logout' });
+      return res.status(500).json({ error: "Failed to logout" });
     }
-    res.clearCookie('connect.sid');
+    res.clearCookie("connect.sid");
     res.json({ success: true });
   });
 });

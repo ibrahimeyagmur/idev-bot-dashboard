@@ -14,7 +14,6 @@ import {
   Settings,
   Loader2,
 } from 'lucide-react';
-import { Button } from '../../components/ui/Button';
 
 interface SystemStatus {
   welcome: { enabled: boolean };
@@ -95,7 +94,6 @@ export function OverviewPage() {
           setBotInstalled(false);
         }
       } catch {
-        // Silent fail
       } finally {
         setIsLoading(false);
       }
@@ -114,7 +112,6 @@ export function OverviewPage() {
 
   return (
     <div className="max-w-[1200px] mx-auto">
-      {/* Header */}
       <div className="mb-8">
         <h1 className="text-2xl font-bold text-white mb-2">Kontrol Paneli</h1>
         <p className="text-slate-400">
@@ -122,7 +119,6 @@ export function OverviewPage() {
         </p>
       </div>
 
-      {/* Bot Health Check */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -169,7 +165,6 @@ export function OverviewPage() {
         </div>
       </motion.div>
 
-      {/* System Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {systemCards.map((card, index) => {
           const Icon = card.icon;

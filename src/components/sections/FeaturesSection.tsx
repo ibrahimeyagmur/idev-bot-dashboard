@@ -1,7 +1,7 @@
-import { Link } from 'react-router-dom';
-import { ArrowRight } from 'lucide-react';
-import { motion } from 'framer-motion';
-import { features } from '../../data/mockFeatures';
+import { Link } from "react-router-dom";
+import { ArrowRight } from "lucide-react";
+import { motion } from "framer-motion";
+import { features } from "../../data/mockFeatures";
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -30,7 +30,6 @@ export function FeaturesSection() {
   return (
     <section id="ozellikler" className="py-20 lg:py-32">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Section Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
@@ -46,7 +45,6 @@ export function FeaturesSection() {
           </p>
         </motion.div>
 
-        {/* Features Grid */}
         <motion.div
           variants={containerVariants}
           initial="hidden"
