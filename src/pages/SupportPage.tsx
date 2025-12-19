@@ -9,6 +9,7 @@ import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { api, type FAQ } from "../lib/api";
 import { Button } from "../components/ui/Button";
+import { mockFAQ } from "../data/mockFeatures";
 
 export function SupportPage() {
   const [expandedFAQ, setExpandedFAQ] = useState<number | null>(null);
@@ -19,9 +20,10 @@ export function SupportPage() {
     const fetchFAQ = async () => {
       try {
         const data = await api.getFAQ();
-        setFaqList(data);
+        setFaqList(data.length > 0 ? data : mockFAQ);
       } catch (error) {
         console.error("Failed to fetch FAQ:", error);
+        setFaqList(mockFAQ);
       } finally {
         setIsLoading(false);
       }
