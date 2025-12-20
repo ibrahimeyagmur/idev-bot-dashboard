@@ -51,6 +51,7 @@ export function AutoReplyPage() {
   });
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const [deletingRule, setDeletingRule] = useState<Rule | null>(null);
   const initialDataRef = useRef<AutoReplySettings | null>(null);
   const pendingNavigationRef = useRef<(() => void) | null>(null);
 
@@ -158,11 +159,13 @@ export function AutoReplyPage() {
     setEditingRule(null);
   };
 
-  const deleteRule = (id: string) => {
+  const deleteRule = () => {
+    if (!deletingRule) return;
     setSettings((prev) => ({
       ...prev,
-      rules: prev.rules.filter((r) => r.id !== id),
+      rules: prev.rules.filter((r) => r.id !== deletingRule.id),
     }));
+    setDeletingRule(null);
   };
 
   const filteredRules = settings.rules.filter(
@@ -336,7 +339,7 @@ export function AutoReplyPage() {
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
-                        onClick={() => deleteRule(rule.id)}
+                        onClick={() => setDeletingRule(rule)}
                         className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                       >
                         <Trash2 className="w-4 h-4" />
@@ -589,6 +592,58 @@ export function AutoReplyPage() {
                   }}
                 >
                   Ayrıl
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deletingRule && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setDeletingRule(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-background border border-white/10 rounded-xl w-full max-w-md p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-full bg-red-500/20">
+                  <Trash2 className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Kuralı Sil</h3>
+                  <p className="text-sm text-slate-400">Bu işlem geri alınamaz!</p>
+                </div>
+              </div>
+
+              <div className="mb-6 p-3 bg-white/5 rounded-lg">
+                <p className="text-sm text-slate-300">
+                  <span className="text-white font-medium">"{deletingRule.keyword}"</span> kuralını silmek istediğinizden emin misiniz?
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => setDeletingRule(null)}
+                >
+                  İptal
+                </Button>
+                <button
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
+                  onClick={deleteRule}
+                >
+                  Sil
                 </button>
               </div>
             </motion.div>

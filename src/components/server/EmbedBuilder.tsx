@@ -58,6 +58,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
   const [showSendModal, setShowSendModal] = useState(false);
   const [sendingEmbedId, setSendingEmbedId] = useState<string | null>(null);
   const [sendError, setSendError] = useState("");
+  const [deletingEmbed, setDeletingEmbed] = useState<EmbedData | null>(null);
 
   const getEmbedJson = (embed: EmbedData) => {
     const discordEmbed: any = {};
@@ -170,12 +171,12 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
     }
   };
 
-  const deleteEmbed = async (id: string) => {
-    if (!confirm("Bu gömülü mesajı silmek istediğinize emin misiniz?")) return;
+  const deleteEmbed = async () => {
+    if (!deletingEmbed) return;
 
     try {
       const res = await fetch(
-        `${API_BASE}/api/server/${serverId}/embeds/${id}`,
+        `${API_BASE}/api/server/${serverId}/embeds/${deletingEmbed.id}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -183,10 +184,12 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
       );
 
       if (res.ok) {
-        onUpdate(embeds.filter((e) => e.id !== id));
+        onUpdate(embeds.filter((e) => e.id !== deletingEmbed.id));
       }
     } catch (err) {
       console.error("Failed to delete embed:", err);
+    } finally {
+      setDeletingEmbed(null);
     }
   };
 
@@ -318,7 +321,7 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
                     <Eye className="w-4 h-4" />
                   </button>
                   <button
-                    onClick={() => deleteEmbed(embed.id)}
+                    onClick={() => setDeletingEmbed(embed)}
                     className="p-2 text-red-400 hover:bg-red-500/10 rounded-lg transition-colors"
                     title="Sil"
                   >
@@ -721,6 +724,58 @@ export function EmbedBuilder({ serverId, embeds, channels, onUpdate }: Props) {
           >
             <Check className="w-4 h-4" />
             JSON kopyalandı!
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <AnimatePresence>
+        {deletingEmbed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+            onClick={() => setDeletingEmbed(null)}
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="bg-[#12131a] border border-white/10 rounded-xl w-full max-w-md p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-full bg-red-500/20">
+                  <Trash2 className="w-6 h-6 text-red-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">Embed'i Sil</h3>
+                  <p className="text-sm text-slate-400">Bu işlem geri alınamaz!</p>
+                </div>
+              </div>
+
+              <div className="mb-6 p-3 bg-white/5 rounded-lg">
+                <p className="text-sm text-slate-300">
+                  <span className="text-white font-medium">"{deletingEmbed.title || 'Başlıksız Embed'}"</span> embed'ini silmek istediğinizden emin misiniz?
+                </p>
+              </div>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => setDeletingEmbed(null)}
+                >
+                  İptal
+                </Button>
+                <button
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
+                  onClick={deleteEmbed}
+                >
+                  Sil
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
