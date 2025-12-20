@@ -5,14 +5,13 @@ import {
   Shield,
   Link2,
   MessageSquareOff,
-  Save,
   Loader2,
-  Check,
   Hash,
   Users,
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { SaveBar } from "../../components/ui/SaveBar";
 import { useDashboardInit } from "../../context/DashboardContext";
 import { API_BASE } from "../../lib/api";
 
@@ -62,8 +61,8 @@ export function AutoModPage() {
   const dashboard = useDashboardInit(serverId);
   const [settings, setSettings] = useState<AutoModSettings>(defaultSettings);
   const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
   const initialDataRef = useRef<AutoModSettings | null>(null);
@@ -101,30 +100,40 @@ export function AutoModPage() {
     setIsLoading(dashboard.isLoading);
   }, [dashboard.settings, dashboard.isLoading]);
 
-  const saveSettings = async (type: "antiAd" | "profanity") => {
-    setSaving(type);
+  const saveAllSettings = async () => {
+    setSaving(true);
     try {
-      const res = await fetch(
-        `${API_BASE}/api/server/${serverId}/automod/${
-          type === "antiAd" ? "antiad" : "profanity"
-        }`,
-        {
+      const [antiAdRes, profanityRes] = await Promise.all([
+        fetch(`${API_BASE}/api/server/${serverId}/automod/antiad`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           credentials: "include",
-          body: JSON.stringify(settings[type]),
-        }
-      );
+          body: JSON.stringify(settings.antiAd),
+        }),
+        fetch(`${API_BASE}/api/server/${serverId}/automod/profanity`, {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify(settings.profanity),
+        }),
+      ]);
 
-      if (res.ok) {
-        setSaved(type);
-        setTimeout(() => setSaved(null), 2000);
-        initialDataRef.current = { ...settings };
+      if (antiAdRes.ok && profanityRes.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        initialDataRef.current = JSON.parse(JSON.stringify(settings));
         setHasUnsavedChanges(false);
       }
     } catch {
     } finally {
-      setSaving(null);
+      setSaving(false);
+    }
+  };
+
+  const resetChanges = () => {
+    if (initialDataRef.current) {
+      setSettings(JSON.parse(JSON.stringify(initialDataRef.current)));
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -285,22 +294,7 @@ export function AutoModPage() {
           </div>
         </div>
 
-        <div className="pt-4 border-t border-white/10">
-          <Button
-            onClick={() => saveSettings(type)}
-            disabled={saving === type || !settings[type].enabled}
-          >
-            {saving === type ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : saved === type ? (
-              <Check className="w-4 h-4 mr-2" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            {saved === type ? "Kaydedildi!" : "Kaydet"}
-          </Button>
-        </div>
-      </div>
+              </div>
     </motion.div>
   );
 
@@ -394,6 +388,14 @@ export function AutoModPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SaveBar
+        show={hasUnsavedChanges}
+        saving={saving}
+        saved={saved}
+        onSave={saveAllSettings}
+        onReset={resetChanges}
+      />
     </div>
   );
 }

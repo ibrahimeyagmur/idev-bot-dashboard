@@ -9,12 +9,11 @@ import {
   Edit,
   Save,
   Loader2,
-  Check,
-  X,
   Search,
   AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { SaveBar } from "../../components/ui/SaveBar";
 import { API_BASE } from "../../lib/api";
 
 interface Rule {
@@ -101,12 +100,19 @@ export function AutoReplyPage() {
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
-        initialDataRef.current = { ...settings };
+        initialDataRef.current = JSON.parse(JSON.stringify(settings));
         setHasUnsavedChanges(false);
       }
     } catch {
     } finally {
       setSaving(false);
+    }
+  };
+
+  const resetChanges = () => {
+    if (initialDataRef.current) {
+      setSettings(JSON.parse(JSON.stringify(initialDataRef.current)));
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -342,22 +348,7 @@ export function AutoReplyPage() {
             </div>
           )}
 
-          <div className="mt-6 pt-6 border-t border-white/10">
-            <Button
-              onClick={saveSettings}
-              disabled={saving || !settings.enabled}
-            >
-              {saving ? (
-                <Loader2 className="w-4 h-4 animate-spin mr-2" />
-              ) : saved ? (
-                <Check className="w-4 h-4 mr-2" />
-              ) : (
-                <Save className="w-4 h-4 mr-2" />
-              )}
-              {saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}
-            </Button>
-          </div>
-        </div>
+                  </div>
       </motion.div>
 
       <AnimatePresence>
@@ -604,6 +595,14 @@ export function AutoReplyPage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SaveBar
+        show={hasUnsavedChanges}
+        saving={saving}
+        saved={saved}
+        onSave={saveSettings}
+        onReset={resetChanges}
+      />
     </div>
   );
 }

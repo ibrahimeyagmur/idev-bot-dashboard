@@ -4,9 +4,7 @@ import { useDashboardInit } from '../../context/DashboardContext';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   MessageSquare,
-  Save,
   Loader2,
-  Check,
   Hash,
   UserPlus,
   UserMinus,
@@ -17,6 +15,7 @@ import {
   FileText,
 } from 'lucide-react';
 import { Button } from '../../components/ui/Button';
+import { SaveBar } from '../../components/ui/SaveBar';
 import { DiscordMessagePreview } from '../../components/server/DiscordMessagePreview';
 import { API_BASE } from '../../lib/api';
 
@@ -77,8 +76,8 @@ export function WelcomePage() {
   const [welcomeData, setWelcomeData] = useState<WelcomeData>(defaultWelcome);
   const [leaveData, setLeaveData] = useState<LeaveData>(defaultLeave);
   const [isLoading, setIsLoading] = useState(true);
-  const [saving, setSaving] = useState<string | null>(null);
-  const [saved, setSaved] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [validationErrors, setValidationErrors] = useState<{ welcome?: string; leave?: string }>({});
   const [showUnsavedModal, setShowUnsavedModal] = useState(false);
@@ -136,33 +135,43 @@ export function WelcomePage() {
     return true;
   };
 
-  const saveSettings = async (type: 'welcome' | 'leave') => {
-    const data = type === 'welcome' ? welcomeData : leaveData;
+  const saveAllSettings = async () => {
+    if (!validateData('welcome', welcomeData) || !validateData('leave', leaveData)) return;
     
-    if (!validateData(type, data)) return;
-    
-    setSaving(type);
+    setSaving(true);
     try {
-      const res = await fetch(`${API_BASE}/api/server/${serverId}/${type}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(data),
-      });
+      const [welcomeRes, leaveRes] = await Promise.all([
+        fetch(`${API_BASE}/api/server/${serverId}/welcome`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(welcomeData),
+        }),
+        fetch(`${API_BASE}/api/server/${serverId}/leave`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          credentials: 'include',
+          body: JSON.stringify(leaveData),
+        }),
+      ]);
 
-      if (res.ok) {
-        setSaved(type);
-        setTimeout(() => setSaved(null), 2000);
-        if (type === 'welcome') {
-          initialDataRef.current = { ...initialDataRef.current!, welcome: { ...welcomeData } };
-        } else {
-          initialDataRef.current = { ...initialDataRef.current!, leave: { ...leaveData } };
-        }
+      if (welcomeRes.ok && leaveRes.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+        initialDataRef.current = { welcome: { ...welcomeData }, leave: { ...leaveData } };
         setHasUnsavedChanges(false);
       }
     } catch {
     } finally {
-      setSaving(null);
+      setSaving(false);
+    }
+  };
+
+  const resetChanges = () => {
+    if (initialDataRef.current) {
+      setWelcomeData({ ...initialDataRef.current.welcome });
+      setLeaveData({ ...initialDataRef.current.leave });
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -400,17 +409,7 @@ export function WelcomePage() {
             </div>
           )}
 
-          <Button onClick={() => saveSettings(type)} disabled={saving === type}>
-            {saving === type ? (
-              <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            ) : saved === type ? (
-              <Check className="w-4 h-4 mr-2" />
-            ) : (
-              <Save className="w-4 h-4 mr-2" />
-            )}
-            {saved === type ? 'Kaydedildi!' : 'Kaydet'}
-          </Button>
-        </div>
+                  </div>
 
         <div>
           <label className="text-sm font-medium text-slate-300 mb-2 block">Önizleme</label>
@@ -514,6 +513,14 @@ export function WelcomePage() {
           </motion.div>
         )}
       </AnimatePresence>
+
+      <SaveBar
+        show={hasUnsavedChanges}
+        saving={saving}
+        saved={saved}
+        onSave={saveAllSettings}
+        onReset={resetChanges}
+      />
     </div>
   );
 }

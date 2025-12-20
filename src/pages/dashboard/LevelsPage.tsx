@@ -1,23 +1,23 @@
-import { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useState, useEffect, useRef } from "react";
+import { useParams, useBlocker } from "react-router-dom";
 import { useDashboardInit } from "../../context/DashboardContext";
 import { motion } from "framer-motion";
 import {
   TrendingUp,
-  Save,
   Loader2,
-  Check,
   Hash,
   Plus,
   Trash2,
   Award,
   Zap,
   Clock,
-  MessageSquare,
   Star,
   Sparkles,
+  AlertTriangle,
 } from "lucide-react";
 import { Button } from "../../components/ui/Button";
+import { SaveBar } from "../../components/ui/SaveBar";
+import { AnimatePresence } from "framer-motion";
 import { API_BASE } from "../../lib/api";
 
 interface LevelData {
@@ -50,11 +50,36 @@ export function LevelsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedModal, setShowUnsavedModal] = useState(false);
+  const initialDataRef = useRef<LevelData | null>(null);
+  const pendingNavigationRef = useRef<(() => void) | null>(null);
+
+  const blocker = useBlocker(
+    ({ currentLocation, nextLocation }) =>
+      hasUnsavedChanges && currentLocation.pathname !== nextLocation.pathname
+  );
+
+  useEffect(() => {
+    if (blocker.state === "blocked") {
+      setShowUnsavedModal(true);
+      pendingNavigationRef.current = () => blocker.proceed();
+    }
+  }, [blocker]);
+
+  useEffect(() => {
+    if (initialDataRef.current) {
+      const hasChanges =
+        JSON.stringify(levelData) !== JSON.stringify(initialDataRef.current);
+      setHasUnsavedChanges(hasChanges);
+    }
+  }, [levelData]);
 
   useEffect(() => {
     if (!contextLoading && settings) {
-      if (settings.levels)
-        setLevelData({ ...defaultLevelData, ...settings.levels });
+      const data = { ...defaultLevelData, ...settings.levels };
+      setLevelData(data);
+      initialDataRef.current = data;
       setIsLoading(false);
     }
   }, [contextLoading, settings]);
@@ -75,10 +100,19 @@ export function LevelsPage() {
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 2000);
+        initialDataRef.current = JSON.parse(JSON.stringify(levelData));
+        setHasUnsavedChanges(false);
       }
     } catch {
     } finally {
       setSaving(false);
+    }
+  };
+
+  const resetChanges = () => {
+    if (initialDataRef.current) {
+      setLevelData(JSON.parse(JSON.stringify(initialDataRef.current)));
+      setHasUnsavedChanges(false);
     }
   };
 
@@ -419,22 +453,73 @@ export function LevelsPage() {
         )}
       </motion.div>
 
-      <div
-        className={`flex justify-end ${
-          !levelData.enabled ? "opacity-50 pointer-events-none" : ""
-        }`}
-      >
-        <Button onClick={saveSettings} disabled={saving || !levelData.enabled}>
-          {saving ? (
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          ) : saved ? (
-            <Check className="w-4 h-4 mr-2" />
-          ) : (
-            <Save className="w-4 h-4 mr-2" />
-          )}
-          {saved ? "Kaydedildi!" : "Değişiklikleri Kaydet"}
-        </Button>
-      </div>
+      <AnimatePresence>
+        {showUnsavedModal && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4"
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1, x: [0, -10, 10, -10, 10, 0] }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              transition={{ x: { duration: 0.5 } }}
+              className="bg-background border border-white/10 rounded-xl w-full max-w-md p-6"
+            >
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 rounded-full bg-yellow-500/20">
+                  <AlertTriangle className="w-6 h-6 text-yellow-400" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-white">
+                    Kaydedilmemiş Değişiklikler
+                  </h3>
+                  <p className="text-sm text-slate-400">
+                    Değişiklikleriniz kaybolacak!
+                  </p>
+                </div>
+              </div>
+
+              <p className="text-slate-300 mb-6">
+                Kaydedilmemiş değişiklikleriniz var. Sayfadan ayrılmak
+                istediğinizden emin misiniz?
+              </p>
+
+              <div className="flex gap-3">
+                <Button
+                  variant="secondary"
+                  className="flex-1"
+                  onClick={() => {
+                    setShowUnsavedModal(false);
+                    blocker.reset?.();
+                  }}
+                >
+                  İptal
+                </Button>
+                <button
+                  className="flex-1 px-4 py-2.5 rounded-lg bg-red-500 hover:bg-red-600 text-white font-medium transition-colors"
+                  onClick={() => {
+                    setShowUnsavedModal(false);
+                    pendingNavigationRef.current?.();
+                  }}
+                >
+                  Ayrıl
+                </button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      <SaveBar
+        show={hasUnsavedChanges}
+        saving={saving}
+        saved={saved}
+        onSave={saveSettings}
+        onReset={resetChanges}
+      />
     </div>
   );
 }
